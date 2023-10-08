@@ -25,7 +25,7 @@
 - `com.wallet.audit`: содержит класс для аудита действий игроков.
 
 ## Запуск приложения
-
+0. Установите JDC(java development kit) https://www.oracle.com/java/technologies/downloads/
 1. Клонируйте репозиторий на вашу локальную машину:
    git clone https://github.com/licore1696/wallet.git
 
@@ -35,9 +35,9 @@ cd wallet
 
 3. Соберите проект и запустите его:
 
-javac src/com/wallet/ui/WalletApp.java
+javac -cp src\main\java\ src\main\java\com\wallet\ui\WalletApp.java
 
-java -cp src com.wallet.ui.WalletApp
+java -cp src\main\java com.wallet.ui.WalletApp
 
 ## Использование приложения
 
