@@ -35,7 +35,7 @@ cd wallet
 
 3. Соберите проект и запустите его:
 
-javac -cp src\main\java\ src\main\java\com\wallet\ui\WalletApp.java
+javac -cp src\main\java\com\wallet\ui\WalletApp.java
 
 java -cp src\main\java com.wallet.ui.WalletApp
 
