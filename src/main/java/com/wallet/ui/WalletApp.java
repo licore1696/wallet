@@ -3,9 +3,10 @@ package com.wallet.ui;
 import com.wallet.audit.Audit;
 import com.wallet.audit.ConsoleAudit;
 import com.wallet.domain.Transaction;
+import com.wallet.service.AdminService;
+import com.wallet.service.WalletService;
 import com.wallet.storage.InMemoryStorage;
 import com.wallet.storage.Storage;
-import com.wallet.service.WalletService;
 
 import java.util.List;
 import java.util.Scanner;
@@ -19,7 +20,7 @@ public class WalletApp {
         Storage storage = new InMemoryStorage();
         Audit audit = new ConsoleAudit();
         WalletService walletService = new WalletService(storage, audit);
-
+        AdminService adminService = new AdminService(storage,audit);
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -30,6 +31,7 @@ public class WalletApp {
             System.out.println("4. Дебет");
             System.out.println("5. Кредит");
             System.out.println("6. История транзакций");
+            System.out.println("7. Авторизация администратора");
             System.out.println("0. Выход");
 
             int choice = scanner.nextInt();
@@ -89,6 +91,19 @@ public class WalletApp {
                     List<Transaction> transactions = walletService.getPlayerTransactionHistory(historyUsername);
                     for (Transaction transaction : transactions) {
                         System.out.println("Идентификатор транзакции: " + transaction.getTransactionId() + ", Сумма: " + transaction.getAmount());
+                    }
+                    break;
+                case 7:
+                    System.out.println("Введите имя администратора: ");
+                    String adminUsername = scanner.nextLine();
+                    System.out.print("Введите пароль: ");
+                    String adminPassword = scanner.nextLine();
+                    boolean isAdminAuthenticated = adminService.authenticateAdmin(adminUsername, adminPassword);
+                    if (isAdminAuthenticated) {
+                        System.out.println("Аутентификация успешная.");
+                        //реализация админ панели
+                    } else {
+                        System.out.println("Аутентификация не удалась.");
                     }
                     break;
                 case 0:
