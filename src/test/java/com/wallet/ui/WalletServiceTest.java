@@ -36,8 +36,8 @@ public class WalletServiceTest {
         String password = "testPassword";
 
         when(storage.getPlayer(username)).thenReturn(null);
-
-        walletService.registerPlayer(username, password);
+        Player player = new Player(username, password);
+        walletService.registerPlayer(player);
 
         verify(storage).addPlayer(any(Player.class));
         verify(audit).log(username, "Registration");
@@ -50,13 +50,13 @@ public class WalletServiceTest {
 
         when(storage.getPlayer(username)).thenReturn(new Player(username, password));
 
-        walletService.registerPlayer(username, password);
+        Player player = new Player(username, password);
+        walletService.registerPlayer(player);
 
         verify(storage, never()).addPlayer(any(Player.class));
         verify(audit, never()).log(username, "Registration");
     }
 
-    // Добавьте другие тесты для authenticatePlayer, getPlayerBalance и других методов
 
     @Test
     public void testDebit_Success() {

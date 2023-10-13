@@ -29,31 +29,28 @@ public class WalletService {
     /**
      * Регистрация нового игрока с указанным именем пользователя и паролем.
      *
-     * @param username Имя пользователя игрока.
-     * @param password Пароль игрока.
+     * @param player Аккаунт игрока.
      */
-    public void registerPlayer(String username, String password) {
-        Player existingPlayer = storage.getPlayer(username);
+    public void registerPlayer(Player player) {
+        Player existingPlayer = storage.getPlayer(player.getUsername());
         if (existingPlayer == null) {
-            Player player = new Player(username, password);
             storage.addPlayer(player);
-            audit.log(username, "Регистрация");
+            audit.log(player.getUsername(), "Регистрация");
         } else {
-            System.out.println("Username already exists. Registration failed.");
+            System.out.println("Такой логин уже существует. Ошибка регистрации.");
         }
     }
 
     /**
      * Аутентификация игрока с указанным именем пользователя и паролем.
      *
-     * @param username Имя пользователя игрока.
-     * @param password Пароль игрока.
-     * @return true, если аутентификация успешна, false в противном случае.
+     @param player Аккаунт игрока.
+     @return true, если аутентификация успешна, false в противном случае.
      */
-    public boolean authenticatePlayer(String username, String password) {
-        Player player = storage.getPlayer(username);
-        if (player != null && player.getPassword().equals(password)) {
-            audit.log(username, "Аутентификация");
+    public boolean authenticatePlayer(Player player) {
+        Player exitingPlayer = storage.getPlayer(player.getUsername());
+        if (exitingPlayer != null && exitingPlayer.getPassword().equals(player.getPassword())) {
+            audit.log(player.getUsername(), "Аутентификация");
             return true;
         }
         return false;

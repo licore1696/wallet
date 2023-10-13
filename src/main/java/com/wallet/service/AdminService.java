@@ -27,11 +27,10 @@ import com.wallet.storage.Storage;
             }
         }
 
-        public boolean authenticateAdmin(String username, String password) {
-            Admin admin = storage.getAdmin(username);
-            if (admin != null) {
-                System.out.println(admin.getPassword());
-                return admin.getPassword().equals(password);
+        public boolean authenticateAdmin(Admin admin) {
+            Admin ExitingAdmin = storage.getAdmin(admin.getUsername());
+            if (ExitingAdmin != null) {
+                return ExitingAdmin.getPassword().equals(admin.getPassword());
             }
             return false;
         }

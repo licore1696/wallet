@@ -1,37 +1,30 @@
 package com.wallet.ui;
 
 import com.wallet.service.AdminService;
-import com.wallet.in.InputConsole;
-import com.wallet.out.OutputConsole;
+import com.wallet.in.Input;
+import com.wallet.out.Output;
+
+import java.util.Scanner;
 
 public class AdminConsole {
-    private InputConsole inputConsole;
-    private OutputConsole outputConsole;
+    private Input input = new Input(new Scanner(System.in));
+    private Output output;
     private AdminService adminService;
 
-    public AdminConsole(InputConsole inputConsole, OutputConsole outputConsole, AdminService adminService) {
-        this.inputConsole = inputConsole;
-        this.outputConsole = outputConsole;
+    public AdminConsole(Input input, AdminService adminService) {
+        this.input = input;
         this.adminService = adminService;
     }
 
-    public void startAdminConsole() {
-        outputConsole.displayMessage("Admin Console");
-        outputConsole.displayMessage("Enter your admin username and password:");
+    public void startAdminConsole(Scanner scanner) {
 
-        outputConsole.displayMessage("Username: ");
-        String adminUsername = inputConsole.getStringInput();
-        outputConsole.displayMessage("Password: ");
-        String adminPassword = inputConsole.getStringInput();
-
-        boolean isAdminAuthenticated = adminService.authenticateAdmin(adminUsername, adminPassword);
-
+        boolean isAdminAuthenticated = adminService.authenticateAdmin( input.InputAdmin(scanner));
         if (isAdminAuthenticated) {
-            outputConsole.displayMessage("Admin authentication successful.");
+            System.out.println("Admin authentication successful.");
 
             while (true) {
                 displayMainMenu(); // Display the main menu options
-                int adminChoice = inputConsole.getIntInput();
+                int adminChoice = input.getIntInput(" ");
 
                 switch (adminChoice) {
                     case 1:
@@ -44,65 +37,63 @@ public class AdminConsole {
                         unbanPlayer();
                         break;
                     case 0:
-                        outputConsole.displayMessage("Exiting admin panel.");
+                        displayMessage("Выход с админ панели. ");
                         return;
                     default:
-                        outputConsole.displayMessage("Invalid choice. Please try again.");
+                        displayMessage("Неверный выбор. Попробуйте снова. ");
                 }
             }
         } else {
-            outputConsole.displayMessage("Admin authentication failed.");
+            displayMessage("Admin authentication failed.");
+
         }
     }
 
     private void displayMainMenu() {
-        outputConsole.displayMessage("Admin Options:");
-        outputConsole.displayMessage("1. Register Admin");
-        outputConsole.displayMessage("2. Ban Player");
-        outputConsole.displayMessage("3. Unban Player");
-        outputConsole.displayMessage("0. Exit");
+        displayMessage("Меню администратора: ");
+        displayMessage("1. Регистрация администратора ");
+        displayMessage("2. Блокировка игрока");
+        displayMessage("3. Разблокировка игрока");
+        displayMessage("0. Выход из меню администратора");
     }
 
     private void registerAdmin() {
-        outputConsole.displayMessage("Register New Admin");
-        outputConsole.displayMessage("Enter username: ");
-        String newAdminUsername = inputConsole.getStringInput();
-        outputConsole.displayMessage("Enter password: ");
-        String newAdminPassword = inputConsole.getStringInput();
+       displayMessage("Регистрация нового администратора");
+        String newAdminUsername = input.getStringInput("Введите имя администратора: ");
+        String newAdminPassword = input.getStringInput("Введите пароль: ");
 
         adminService.registerAdmin(newAdminUsername, newAdminPassword);
-        outputConsole.displayMessage("Admin registration successful.");
+        displayMessage("Успешная регистрация администратора.");
     }
 
     private void banPlayer() {
-        outputConsole.displayMessage("Ban Player");
-        outputConsole.displayMessage("Enter admin username: ");
-        String adminUsername = inputConsole.getStringInput();
-        outputConsole.displayMessage("Enter player username to ban: ");
-        String playerUsername = inputConsole.getStringInput();
+        displayMessage("Блокировка игрока");
+        String adminUsername = input.getStringInput("Введите имя администратора: ");
+        String playerUsername = input.getStringInput("Введите имя игрока, что бы заблокировать: ");
 
         boolean result = adminService.banPlayer(adminUsername, playerUsername);
 
         if (result) {
-            outputConsole.displayMessage("Player banned successfully.");
+            displayMessage("Игрок заблокирован успешно.");
         } else {
-            outputConsole.displayMessage("Ban operation failed.");
+            displayMessage("Ошибка в процедуре блокировки.");
         }
     }
 
     private void unbanPlayer() {
-        outputConsole.displayMessage("Unban Player");
-        outputConsole.displayMessage("Enter admin username: ");
-        String adminUsername = inputConsole.getStringInput();
-        outputConsole.displayMessage("Enter player username to unban: ");
-        String playerUsername = inputConsole.getStringInput();
+        displayMessage("Разблокировка игрока");
+        String adminUsername = input.getStringInput("Введите имя администратора: ");
+        String playerUsername = input.getStringInput("Введите имя игрока для разблокировки: ");
 
         boolean result = adminService.unbanPlayer(adminUsername, playerUsername);
 
         if (result) {
-            outputConsole.displayMessage("Player unbanned successfully.");
+            displayMessage("Игрок разблокирован успешно.");
         } else {
-            outputConsole.displayMessage("Unban operation failed.");
+            displayMessage("Ошибка в процедуре разблокировки");
         }
+    }
+    public void displayMessage(String promt){
+        System.out.println(promt);
     }
 }

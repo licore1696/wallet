@@ -1,6 +1,11 @@
 package com.wallet.out;
 
-public class OutputConsole {
+import java.util.Scanner;
+
+public class Output {
+    Output(Scanner scanner){
+
+    }
     public void displayMainMenu() {
         System.out.println("1. Регистрация игрока");
         System.out.println("2. Авторизация игрока");

@@ -1,6 +1,8 @@
 package com.wallet.ui;
 
+import com.wallet.domain.Player;
 import com.wallet.domain.Transaction;
+import com.wallet.in.Input;
 import com.wallet.service.AdminService;
 import com.wallet.service.WalletService;
 
@@ -10,10 +12,13 @@ import java.util.Scanner;
 public class UserConsole {
     private WalletService walletService;
     private AdminService adminService;
+    private AdminConsole adminConsole;
+    private Input input=new Input(new Scanner(System.in));
 
     public UserConsole(WalletService walletService, AdminService adminService) {
         this.walletService = walletService;
         this.adminService = adminService;
+        this.adminConsole = new AdminConsole(input, adminService);
     }
 
     public void runUserInterface() {
@@ -65,19 +70,12 @@ public class UserConsole {
     }
 
     private void registerPlayer(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String registerUsername = scanner.nextLine();
-        System.out.print("Введите пароль: ");
-        String registerPassword = scanner.nextLine();
-        walletService.registerPlayer(registerUsername, registerPassword);
+        walletService.registerPlayer(input.InputPlayer(scanner));
     }
 
     private void authenticatePlayer(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String authUsername = scanner.nextLine();
-        System.out.print("Введите пароль: ");
-        String authPassword = scanner.nextLine();
-        boolean isAuthenticated = walletService.authenticatePlayer(authUsername, authPassword);
+        Player authplayer = input.InputPlayer(scanner);
+        boolean isAuthenticated = walletService.authenticatePlayer(authplayer);
         if (isAuthenticated) {
             System.out.println("Аутентификация успешная.");
         } else {
@@ -86,8 +84,7 @@ public class UserConsole {
     }
 
     private void checkPlayerBalance(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String checkBalanceUsername = scanner.nextLine();
+        String checkBalanceUsername = input.InputUsername(scanner);
         double balance = walletService.getPlayerBalance(checkBalanceUsername);
         System.out.println("Баланс: " + balance);
     }
@@ -104,19 +101,15 @@ public class UserConsole {
     }
 
     private void credit(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String creditUsername = scanner.nextLine();
-        System.out.print("Введите идентификатор транзакции: ");
-        String creditTransactionId = scanner.nextLine();
-        System.out.print("Введите сумму кредита: ");
-        double creditAmount = scanner.nextDouble();
+        String creditUsername = input.getStringInput("Введите имя пользователя: ");
+        String creditTransactionId = input.getStringInput("Введите идентификатор транзакции: ");
+        double creditAmount = input.getDoubleInput("Введите сумму кредита: ");
 
         walletService.credit(creditUsername, creditTransactionId, creditAmount);
     }
 
     private void displayTransactionHistory(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String historyUsername = scanner.nextLine();
+        String historyUsername = input.InputUsername(scanner);
         List<Transaction> transactions = walletService.getPlayerTransactionHistory(historyUsername);
         for (Transaction transaction : transactions) {
             System.out.println("Идентификатор транзакции: " + transaction.getTransactionId() + ", Сумма: " + transaction.getAmount());
@@ -124,16 +117,6 @@ public class UserConsole {
     }
 
     private void authenticateAdmin(Scanner scanner) {
-        System.out.print("Введите имя администратора: ");
-        String adminUsername = scanner.nextLine();
-        System.out.print("Введите пароль: ");
-        String adminPassword = scanner.nextLine();
-        boolean isAdminAuthenticated = adminService.authenticateAdmin(adminUsername, adminPassword);
-        if (isAdminAuthenticated) {
-            System.out.println("Аутентификация успешная.");
-            // Реализуйте админ-панель здесь
-        } else {
-            System.out.println("Аутентификация не удалась.");
-        }
+            adminConsole.startAdminConsole(scanner);
     }
 }
