@@ -5,31 +5,82 @@ import com.wallet.domain.Player;
 
 import java.util.Scanner;
 
+/**
+ * Класс, представляющий ввод данных в системе кошельков.
+ */
 public class Input {
-    private Scanner ownscanner;
+    private Scanner ownScanner;
 
+    /**
+     * Конструктор для создания объекта класса Input с использованием заданного объекта Scanner.
+     *
+     * @param GivenScanner Объект Scanner для ввода данных.
+     */
     public Input(Scanner GivenScanner) {
-        ownscanner = GivenScanner;
+        ownScanner = GivenScanner;
     }
 
+    /**
+     * Получить целое число, запрашивая ввод с заданным приглашением.
+     *
+     * @param prompt Приглашение для ввода.
+     * @return Введенное целое число.
+     */
     public int getIntInput(String prompt) {
         System.out.print(prompt);
-
-        return ownscanner.nextInt();
+        return ownScanner.nextInt();
     }
 
+    /**
+     * Получить целое число без приглашения.
+     *
+     * @return Введенное целое число.
+     */
+    public int getIntInput() {
+        return ownScanner.nextInt();
+    }
+
+    /**
+     * Получить число с плавающей запятой, запрашивая ввод с заданным приглашением.
+     *
+     * @param prompt Приглашение для ввода.
+     * @return Введенное число с плавающей запятой.
+     */
     public double getDoubleInput(String prompt) {
         System.out.print(prompt);
-        return ownscanner.nextDouble();
+        return ownScanner.nextDouble();
     }
 
+    /**
+     * Получить строку, запрашивая ввод с заданным приглашением.
+     *
+     * @param prompt Приглашение для ввода.
+     * @return Введенная строка.
+     */
     public String getStringInput(String prompt) {
         System.out.print(prompt);
-        ownscanner.nextLine(); // Очистка буфера после ввода числа
-        return ownscanner.nextLine();
+        ownScanner.nextLine(); // Очистка буфера после ввода числа
+        return ownScanner.nextLine();
     }
 
-    public Player InputPlayer(Scanner scanner){
+    /**
+     * Получить строку без использования буфера после числового ввода.
+     *
+     * @param promt Приглашение для ввода.
+     * @return Введенная строка.
+     */
+    public String getStringInputNoBuff(String promt) {
+        System.out.println(promt);
+        return ownScanner.nextLine();
+    }
+
+    /**
+     * Получить данные игрока, запрашивая имя пользователя и пароль.
+     *
+     * @param scanner Объект Scanner для ввода данных.
+     * @return Объект Player с введенными данными.
+     */
+    public Player InputPlayer(Scanner scanner) {
         System.out.print("Введите имя пользователя: ");
         String Username = scanner.nextLine();
         System.out.print("Введите пароль: ");
@@ -37,18 +88,28 @@ public class Input {
         return new Player(Username, Password);
     }
 
-    public String InputUsername(Scanner scanner){
+    /**
+     * Получить имя пользователя, запрашивая его ввод.
+     *
+     * @param scanner Объект Scanner для ввода данных.
+     * @return Введенное имя пользователя.
+     */
+    public String InputUsername(Scanner scanner) {
         System.out.print("Введите имя пользователя: ");
         return scanner.nextLine();
     }
-    public Admin InputAdmin(Scanner scanner){
+
+    /**
+     * Получить данные администратора, запрашивая имя администратора и пароль.
+     *
+     * @param scanner Объект Scanner для ввода данных.
+     * @return Объект Admin с введенными данными.
+     */
+    public Admin InputAdmin(Scanner scanner) {
         System.out.print("Введите имя администратора: ");
         String adminUsername = scanner.nextLine();
         System.out.print("Введите пароль: ");
         String adminPassword = scanner.nextLine();
-        return new Admin(adminUsername,adminPassword);
+        return new Admin(adminUsername, adminPassword);
     }
-
-
 }
-

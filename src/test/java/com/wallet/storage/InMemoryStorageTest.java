@@ -2,9 +2,13 @@ package com.wallet.storage;
 
 import static org.junit.Assert.*;
 
+import com.wallet.domain.Admin;
 import com.wallet.domain.Player;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
+
 
 public class InMemoryStorageTest {
 
@@ -41,9 +45,48 @@ public class InMemoryStorageTest {
     }
 
     @Test
+    public void testAddAdmin() {
+        Admin admin = new Admin("adminUser", "adminPassword");
+        storage.addAdmin(admin);
+
+        Admin retrievedAdmin = storage.getAdmin("adminUser");
+        assertNotNull(retrievedAdmin);
+        assertEquals("adminUser", retrievedAdmin.getUsername());
+    }
+
+    @Test
+    public void testGetAllPlayers() {
+        Player player1 = new Player("user1", "password1");
+        Player player2 = new Player("user2", "password2");
+
+        storage.addPlayer(player1);
+        storage.addPlayer(player2);
+
+        List<Player> allPlayers = storage.getAllPlayers();
+        assertNotNull(allPlayers);
+        assertEquals(2, allPlayers.size());
+    }
+
+    @Test
+    public void testGetAdmin() {
+        Admin admin = new Admin("adminUser", "adminPassword");
+        storage.addAdmin(admin);
+
+        Admin retrievedAdmin = storage.getAdmin("adminUser");
+        assertNotNull(retrievedAdmin);
+        assertEquals("adminUser", retrievedAdmin.getUsername());
+    }
+
+    @Test
     public void testGetPlayer_NonExistentUser() {
         Player retrievedPlayer = storage.getPlayer("nonExistentUser");
         assertNull(retrievedPlayer);
+    }
+
+    @Test
+    public void testGetNonExistentAdmin() {
+        Admin admin = storage.getAdmin("nonExistentAdmin");
+        assertNull(admin);
     }
 }
 

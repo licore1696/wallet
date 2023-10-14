@@ -3,7 +3,9 @@ package com.wallet.storage;
 import com.wallet.domain.Admin;
 import com.wallet.domain.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +56,7 @@ public class InMemoryStorage implements Storage {
      */
     @Override
     public Admin getAdmin(String username) {
-        return admins.get(username); // Implement logic to retrieve an admin by username
+        return admins.get(username);
     }
 
     /**
@@ -64,5 +66,14 @@ public class InMemoryStorage implements Storage {
      */
     public void addAdmin(Admin admin){ admins.put(admin.getUsername(), admin);}
 
+    /**
+     * Получить список всех игроков из хранилища.
+     *
+     * @return список всех игроков.
+     */
+    @Override
+    public List<Player> getAllPlayers() {
+        return new ArrayList<>(players.values());
+    }
 
 }

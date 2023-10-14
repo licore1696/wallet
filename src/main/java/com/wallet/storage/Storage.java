@@ -2,6 +2,7 @@ package com.wallet.storage;
 
 import com.wallet.domain.Player;
 import com.wallet.domain.Admin;
+import java.util.List;
 
 public interface Storage {
     Player getPlayer(String username);
@@ -13,4 +14,6 @@ public interface Storage {
     Admin getAdmin(String username);
 
     void addAdmin(Admin admin);
+
+    List<Player> getAllPlayers();
 }

@@ -10,6 +10,9 @@ public class Player {
     private String password;
     private double balance;
     private List<Transaction> transactionHistory;
+    private Boolean StatusBan;
+
+
     /**
      * Конструктор для создания нового игрока с указанными данными.
      *
@@ -21,6 +24,7 @@ public class Player {
         this.password = password;
         this.balance = 0.0;
         this.transactionHistory = new ArrayList<>();
+        this.StatusBan=false;
     }
     /**
      * Возвращает имя пользователя игрока.
@@ -47,6 +51,20 @@ public class Player {
     public double getBalance() {
         return balance;
     }
+
+    /**
+     * Получить статус блокировки.
+     *
+     * @return Статус блокировки.
+     */
+    public boolean getStatusBan() { return StatusBan; }
+    /**
+     * Изменить статус блокировки.
+     *
+     * @param statusBan Новый статус блокировки.
+     */
+    public void setStatusBan(boolean statusBan) { StatusBan=statusBan; }
+
     /**
      * Получить историю транзакций игрока.
      *

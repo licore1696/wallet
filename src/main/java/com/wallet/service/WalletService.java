@@ -49,7 +49,7 @@ public class WalletService {
      */
     public boolean authenticatePlayer(Player player) {
         Player exitingPlayer = storage.getPlayer(player.getUsername());
-        if (exitingPlayer != null && exitingPlayer.getPassword().equals(player.getPassword())) {
+        if (exitingPlayer != null && exitingPlayer.getPassword().equals(player.getPassword()) && !exitingPlayer.getStatusBan()) {
             audit.log(player.getUsername(), "Аутентификация");
             return true;
         }

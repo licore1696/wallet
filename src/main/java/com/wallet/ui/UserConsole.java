@@ -5,34 +5,29 @@ import com.wallet.domain.Transaction;
 import com.wallet.in.Input;
 import com.wallet.service.AdminService;
 import com.wallet.service.WalletService;
+import com.wallet.out.Output;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class UserConsole {
     private WalletService walletService;
-    private AdminService adminService;
     private AdminConsole adminConsole;
-    private Input input=new Input(new Scanner(System.in));
+    public Input input;
+    private Output output = new Output();
+    private AdminService adminService;
 
-    public UserConsole(WalletService walletService, AdminService adminService) {
+    public UserConsole(WalletService walletService, AdminService adminService, Scanner scanner) {
         this.walletService = walletService;
         this.adminService = adminService;
-        this.adminConsole = new AdminConsole(input, adminService);
+        this.input=new Input(scanner);
     }
 
     public void runUserInterface() {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("1. Регистрация игрока");
-            System.out.println("2. Аутентификация игрока");
-            System.out.println("3. Проверка баланса игрока");
-            System.out.println("4. Дебет");
-            System.out.println("5. Кредит");
-            System.out.println("6. История транзакций");
-            System.out.println("7. Аутентификация администратора");
-            System.out.println("0. Выход");
+            output.displayUserMenu();
 
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -69,7 +64,7 @@ public class UserConsole {
         }
     }
 
-    private void registerPlayer(Scanner scanner) {
+    public void registerPlayer(Scanner scanner) {
         walletService.registerPlayer(input.InputPlayer(scanner));
     }
 
@@ -117,6 +112,7 @@ public class UserConsole {
     }
 
     private void authenticateAdmin(Scanner scanner) {
-            adminConsole.startAdminConsole(scanner);
+        adminConsole = new AdminConsole(input, adminService);
+        adminConsole.startAdminConsole(scanner);
     }
 }
