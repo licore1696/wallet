@@ -1,5 +1,7 @@
 package com.wallet.ui;
 
+import com.wallet.audit.Audit;
+import com.wallet.audit.ConsoleAudit;
 import com.wallet.domain.Admin;
 import com.wallet.domain.Player;
 import com.wallet.service.AdminService;
@@ -11,21 +13,23 @@ import java.util.Scanner;
 
 public class AdminConsole {
     private Input input;
-    private Output output = new Output();
+    private Output output = new Output(System.out);
     private AdminService adminService;
     private Admin admin;
+    private Audit audit = new ConsoleAudit();
 
 
-    public AdminConsole(Input input, AdminService adminService) {
+    public AdminConsole(Input input, AdminService adminService, Audit audit) {
         this.input = input;
         this.adminService = adminService;
+        this.audit = audit;
     }
 
     public void startAdminConsole(Scanner scanner) {
         admin = input.InputAdmin(scanner);
         boolean isAdminAuthenticated = adminService.authenticateAdmin(admin);
         if (isAdminAuthenticated) {
-            System.out.println("Admin authentication successful.");
+            output.displayMessage("Аутентификация администратора успешная");
 
             while (true) {
                 output.displayAdminMenu(); // Display the main menu options
@@ -48,72 +52,71 @@ public class AdminConsole {
                         listBannedPlayers();
                         break;
                     case 0:
-                        displayMessage("Выход с админ панели. ");
+                        output.displayMessage("Выход с админ панели. ");
                         return;
                     default:
-                        displayMessage("Неверный выбор. Попробуйте снова. ");
+                        output.displayMessage("Неверный выбор. Попробуйте снова. ");
                 }
             }
         } else {
-            displayMessage("Admin authentication failed.");
+            output.displayMessage("Аутентификация администратора не успешная");
 
         }
     }
 
 
     public void listPlayers() {
+        audit.log(admin.getUsername(), "Просмотр игроков");
         List <Player> players = adminService.getPlayers();
         for (Player player : players) {
-            displayMessage("Имя игрока: " + player.getUsername());
+            output.displayMessage("Имя игрока: " + player.getUsername());
         }
     }
 
     public void listBannedPlayers() {
+        audit.log(admin.getUsername(), "Просмотр заблокированных игроков");
         List<Player> players = adminService.getBannedPlayers();
         for (Player player : players) {
             if (player.getStatusBan()) {
-                displayMessage("Заблокированный игрок: " + player.getUsername());
+                output.displayMessage("Заблокированный игрок: " + player.getUsername());
             }
         }
     }
 
 
     public void registerAdmin() {
-       displayMessage("Регистрация нового администратора");
+
+       output.displayMessage("Регистрация нового администратора");
         String newAdminUsername = input.getStringInput("Введите имя администратора: ");
         String newAdminPassword = input.getStringInputNoBuff("Введите пароль: ");
-
         adminService.registerAdmin(newAdminUsername, newAdminPassword);
-        displayMessage("Успешная регистрация администратора.");
     }
 
     public void banPlayer() {
-        displayMessage("Блокировка игрока");
         String playerUsername = input.getStringInputNoBuff("Введите имя игрока, что бы заблокировать: ");
 
         boolean result = adminService.banPlayer(admin.getUsername(), playerUsername);
 
         if (result) {
-            displayMessage("Игрок заблокирован успешно.");
+            output.displayMessage("Игрок заблокирован успешно.");
+            audit.log(admin.getUsername(), "Блокировка: " + playerUsername);
         } else {
-            displayMessage("Ошибка в процедуре блокировки.");
+            output.displayMessage("Ошибка в процедуре блокировки.");
         }
     }
 
     public void unbanPlayer() {
-        displayMessage("Разблокировка игрока");
+        output.displayMessage("Разблокировка игрока");
         String playerUsername = input.getStringInputNoBuff("Введите имя игрока для разблокировки: ");
 
         boolean result = adminService.unbanPlayer(admin.getUsername(), playerUsername);
 
         if (result) {
-            displayMessage("Игрок разблокирован успешно.");
+            output.displayMessage("Игрок разблокирован успешно.");
+            audit.log(admin.getUsername(), "Разблокировка: " + playerUsername);
         } else {
-            displayMessage("Ошибка в процедуре разблокировки");
+            output.displayMessage("Ошибка в процедуре разблокировки");
         }
-    }
-    public void displayMessage(String promt){
-        System.out.println(promt);
     }
 
     public void setOutput(Output output) {
@@ -122,5 +125,9 @@ public class AdminConsole {
 
     public Output getOutput() {
         return output;
+    }
+
+    void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 }

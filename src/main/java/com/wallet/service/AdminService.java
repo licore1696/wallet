@@ -41,7 +41,7 @@ public class AdminService {
             storage.addAdmin(admin);
             audit.log(username, "Регистрация администратора");
         } else {
-            System.out.println("Username already exists. Registration failed.");
+            System.out.println("Администратор с таким именем уже существует.");
         }
     }
 

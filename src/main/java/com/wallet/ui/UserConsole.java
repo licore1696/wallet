@@ -1,5 +1,7 @@
 package com.wallet.ui;
 
+import com.wallet.audit.Audit;
+import com.wallet.audit.ConsoleAudit;
 import com.wallet.domain.Player;
 import com.wallet.domain.Transaction;
 import com.wallet.in.Input;
@@ -14,13 +16,15 @@ public class UserConsole {
     private WalletService walletService;
     private AdminConsole adminConsole;
     public Input input;
-    private Output output = new Output();
+    Output output = new Output(System.out);
     private AdminService adminService;
+    private Audit audit = new ConsoleAudit();
 
-    public UserConsole(WalletService walletService, AdminService adminService, Scanner scanner) {
+    public UserConsole(WalletService walletService, AdminService adminService, Scanner scanner,Audit audit) {
         this.walletService = walletService;
         this.adminService = adminService;
         this.input=new Input(scanner);
+        this.audit=audit;
     }
 
     public void runUserInterface() {
@@ -68,51 +72,49 @@ public class UserConsole {
         walletService.registerPlayer(input.InputPlayer(scanner));
     }
 
-    private void authenticatePlayer(Scanner scanner) {
+    void authenticatePlayer(Scanner scanner) {
         Player authplayer = input.InputPlayer(scanner);
         boolean isAuthenticated = walletService.authenticatePlayer(authplayer);
         if (isAuthenticated) {
-            System.out.println("Аутентификация успешная.");
+            output.displayMessage("Аутентификация успешная.");
         } else {
-            System.out.println("Аутентификация не удалась.");
+            output.displayMessage("Аутентификация не удалась.");
         }
     }
 
-    private void checkPlayerBalance(Scanner scanner) {
+    void checkPlayerBalance(Scanner scanner) {
         String checkBalanceUsername = input.InputUsername(scanner);
         double balance = walletService.getPlayerBalance(checkBalanceUsername);
-        System.out.println("Баланс: " + balance);
+        output.displayMessage("Баланс: " + balance);
+        audit.log(checkBalanceUsername, "Проверка баланса");
     }
 
-    private void debit(Scanner scanner) {
-        System.out.print("Введите имя пользователя: ");
-        String debitUsername = scanner.nextLine();
-        System.out.print("Введите идентификатор транзакции: ");
-        String debitTransactionId = scanner.nextLine();
-        System.out.print("Введите сумму дебета: ");
-        double debitAmount = scanner.nextDouble();
+    void debit(Scanner scanner) {
+        String debitUsername = input.InputUsername(scanner);
+        String debitTransactionId = input.getStringInput("Введите идентификатор транзакции: ");
+        double debitAmount = input.getDoubleInput("Введите сумму дебета: ");
 
         walletService.debit(debitUsername, debitTransactionId, debitAmount);
     }
 
-    private void credit(Scanner scanner) {
-        String creditUsername = input.getStringInput("Введите имя пользователя: ");
-        String creditTransactionId = input.getStringInput("Введите идентификатор транзакции: ");
+    void credit(Scanner scanner) {
+        String creditUsername = input.InputUsername(scanner);
+        String creditTransactionId = input.getStringInputNoBuff("Введите идентификатор транзакции: ");
         double creditAmount = input.getDoubleInput("Введите сумму кредита: ");
-
         walletService.credit(creditUsername, creditTransactionId, creditAmount);
     }
 
-    private void displayTransactionHistory(Scanner scanner) {
+    void displayTransactionHistory(Scanner scanner) {
         String historyUsername = input.InputUsername(scanner);
+        audit.log(historyUsername, "История транзакций");
         List<Transaction> transactions = walletService.getPlayerTransactionHistory(historyUsername);
         for (Transaction transaction : transactions) {
-            System.out.println("Идентификатор транзакции: " + transaction.getTransactionId() + ", Сумма: " + transaction.getAmount());
+            output.displayMessage("Идентификатор транзакции: " + transaction.getTransactionId() + ", Сумма: " + transaction.getAmount());
         }
     }
 
     private void authenticateAdmin(Scanner scanner) {
-        adminConsole = new AdminConsole(input, adminService);
+        adminConsole = new AdminConsole(input, adminService, audit);
         adminConsole.startAdminConsole(scanner);
     }
 }

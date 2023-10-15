@@ -15,7 +15,7 @@ public class WalletApp {
         Audit audit = new ConsoleAudit();
         WalletService walletService = new WalletService(storage, audit);
         AdminService adminService = new AdminService(storage, audit);
-        UserConsole userConsole = new UserConsole(walletService, adminService, new Scanner(System.in));
+        UserConsole userConsole = new UserConsole(walletService, adminService, new Scanner(System.in), audit);
         userConsole.runUserInterface();
     }
 }

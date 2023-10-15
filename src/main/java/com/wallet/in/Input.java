@@ -70,7 +70,7 @@ public class Input {
      * @return Введенная строка.
      */
     public String getStringInputNoBuff(String promt) {
-        System.out.println(promt);
+        System.out.print(promt);
         return ownScanner.nextLine();
     }
 

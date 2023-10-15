@@ -1,16 +1,18 @@
 package com.wallet.out;
-
-import java.util.Scanner;
+import java.io.PrintStream;
 
 /**
  * Класс, представляющий вывод данных в системе кошельков.
  */
 public class Output {
+
+    private PrintStream outputStream;
+
     /**
      * Конструктор для создания объекта класса Output.
      */
-    public Output() {
-
+    public Output(PrintStream outputStream) {
+        this.outputStream = outputStream;
     }
 
     /**

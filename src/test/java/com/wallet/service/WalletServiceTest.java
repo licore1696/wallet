@@ -1,4 +1,4 @@
-package com.wallet.ui;
+package com.wallet.service;
 
 import com.wallet.audit.Audit;
 import com.wallet.domain.Player;
@@ -40,7 +40,7 @@ public class WalletServiceTest {
         walletService.registerPlayer(player);
 
         verify(storage).addPlayer(any(Player.class));
-        verify(audit).log(username, "Registration");
+        verify(audit).log(username, "Регистрация");
     }
 
     @Test
@@ -54,7 +54,7 @@ public class WalletServiceTest {
         walletService.registerPlayer(player);
 
         verify(storage, never()).addPlayer(any(Player.class));
-        verify(audit, never()).log(username, "Registration");
+        verify(audit, never()).log(username, "Регистрация");
     }
 
 
@@ -75,7 +75,7 @@ public class WalletServiceTest {
 
         assertTrue(result);
         assertEquals(initialBalance - debitAmount, player.getBalance(), 0.01);
-        verify(audit).log(username, "Debit Transaction");
+        verify(audit).log(username, "Дебетовая транзакция");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class WalletServiceTest {
 
         assertFalse(result); // Ожидается, что дебет транзакция провалится из-за недостаточного баланса
         assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Debit Transaction"); // audit.log не должен быть вызван
+        verify(audit, never()).log(username, "Дебетовая транзакция"); // audit.log не должен быть вызван
     }
 
     @Test
@@ -115,7 +115,7 @@ public class WalletServiceTest {
 
         assertFalse(result); // Ожидается, что дебет транзакция провалится из-за неуникального идентификатора транзакции
         assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Debit Transaction"); // audit.log не должен быть вызван
+        verify(audit, never()).log(username, "Дебетовая транзакция"); // audit.log не должен быть вызван
     }
 
 
@@ -134,7 +134,7 @@ public class WalletServiceTest {
         walletService.credit(username, transactionId, creditAmount);
 
         assertEquals(initialBalance + creditAmount, player.getBalance(), 0.01);
-        verify(audit).log(username, "Credit Transaction");
+        verify(audit).log(username, "Кредитная транзакция");
     }
 
     @Test
@@ -154,7 +154,7 @@ public class WalletServiceTest {
         walletService.credit(username, transactionId, creditAmount);
 
         assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Credit Transaction"); // audit.log не должен быть вызван
+        verify(audit, never()).log(username, "Кредитная транзакция"); // audit.log не должен быть вызван
     }
 
     @Test
@@ -167,7 +167,7 @@ public class WalletServiceTest {
 
         walletService.credit(username, transactionId, creditAmount);
 
-        verify(audit, never()).log(username, "Credit Transaction"); // audit.log не должен быть вызван
+        verify(audit, never()).log(username, "Кредитная транзакция"); // audit.log не должен быть вызван
     }
 
 
