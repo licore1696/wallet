@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.7.xsd">
+
+    <!-- Вставка данных в таблицу admins -->
+    <changeSet id="insert-admin-data" author="your_name">
+        <sql>
+            INSERT INTO wallet.admins (username, password) VALUES ('admin', 'admin');
+
+
+        </sql>
+    </changeSet>
+
+    <!-- Вставка данных в таблицу players -->
+    <changeSet id="insert-player-data" author="your_name">
+        <sql>
+            INSERT INTO wallet.players (username, password, balance, statusban) VALUES ('player1', 'player1password', 100.0, false);
+            INSERT INTO wallet.players (username, password, balance, statusban) VALUES ('player2', 'player2password', 200.0, true);
+
+        </sql>
+    </changeSet>
+
+    <!-- Вставка данных в таблицу transactions -->
+    <changeSet id="insert-transaction-data" author="your_name">
+        <sql>
+            INSERT INTO wallet.transactions (transactionid, playerid, amount) VALUES ('transaction1', 1, 50.0);
+            INSERT INTO wallet.transactions (transactionid, playerid, amount) VALUES ('transaction2', 2, 25.0);
+
+        </sql>
+    </changeSet>
+
+    <!-- Добавьте сюда другие таблицы и данные -->
+
+</databaseChangeLog>

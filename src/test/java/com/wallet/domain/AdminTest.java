@@ -1,41 +1,37 @@
 package com.wallet.domain;
 
-import com.wallet.domain.Admin;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.Before;
+import org.junit.Test;
 
 public class AdminTest {
     private Admin admin;
 
-    @BeforeEach
+    @Before
     public void setUp() {
-        admin = new Admin("admin", "password");
+        admin = new Admin("testAdmin", "testPassword");
     }
 
     @Test
     public void testGetUsername() {
-        String username = admin.getUsername();
-        assertEquals("admin", username);
+        assertEquals("testAdmin", admin.getUsername());
+    }
+
+    @Test
+    public void testSetUsername() {
+        admin.setUsername("newAdmin");
+        assertEquals("newAdmin", admin.getUsername());
     }
 
     @Test
     public void testGetPassword() {
-        String password = admin.getPassword();
-        assertEquals("password", password);
+        assertEquals("testPassword", admin.getPassword());
     }
 
     @Test
-    public void testUsernameNotEquals() {
-        String username = admin.getUsername();
-        assertNotEquals("otherAdmin", username);
-    }
-
-    @Test
-    public void testPasswordNotEquals() {
-        String password = admin.getPassword();
-        assertNotEquals("otherPassword", password);
+    public void testSetPassword() {
+        admin.setPassword("newPassword");
+        assertEquals("newPassword", admin.getPassword());
     }
 }

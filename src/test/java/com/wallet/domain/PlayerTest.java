@@ -1,22 +1,38 @@
 package com.wallet.domain;
 
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class PlayerTest {
-
     private Player player;
 
     @Before
     public void setUp() {
-        player = new Player("testUser", "testPassword");
+        player = new Player(1, "testPlayer", "testPassword", 100.0, false);
+    }
+
+    @Test
+    public void testGetId() {
+        assertEquals(1, player.getId());
+    }
+
+    @Test
+    public void testSetId() {
+        player.setId(2);
+        assertEquals(2, player.getId());
     }
 
     @Test
     public void testGetUsername() {
-        assertEquals("testUser", player.getUsername());
+        assertEquals("testPlayer", player.getUsername());
+    }
+
+    @Test
+    public void testSetUsername() {
+        player.setUsername("newPlayer");
+        assertEquals("newPlayer", player.getUsername());
     }
 
     @Test
@@ -25,23 +41,30 @@ public class PlayerTest {
     }
 
     @Test
+    public void testSetPassword() {
+        player.setPassword("newPassword");
+        assertEquals("newPassword", player.getPassword());
+    }
+
+    @Test
     public void testGetBalance() {
-        assertEquals(0.0, player.getBalance(), 0.01);
+        assertEquals(100.0, player.getBalance(), 0.01);
     }
 
     @Test
     public void testSetBalance() {
-        player.setBalance(50.0);
-        assertEquals(50.0, player.getBalance(), 0.01);
+        player.setBalance(200.0);
+        assertEquals(200.0, player.getBalance(), 0.01);
     }
 
     @Test
-    public void testAddTransaction() {
-        Transaction transaction = new Transaction("123", 50.0);
-        player.addTransaction(transaction);
-
-        assertEquals(1, player.getTransactionHistory().size());
-        assertTrue(player.getTransactionHistory().contains(transaction));
+    public void testIsStatusBan() {
+        assertFalse(player.isStatusBan());
     }
 
+    @Test
+    public void testSetStatusBan() {
+        player.setStatusBan(true);
+        assertTrue(player.isStatusBan());
+    }
 }

@@ -2,18 +2,29 @@ package com.wallet.storage;
 
 import com.wallet.domain.Player;
 import com.wallet.domain.Admin;
+import com.wallet.domain.Transaction;
+
 import java.util.List;
 
 public interface Storage {
     Player getPlayer(String username);
 
-    void addPlayer(Player player);
+    boolean addPlayer(Player player);
 
     void updatePlayer(Player player);
+
+    void addTransaction(Transaction transaction);
+
+    List<Transaction> getTransactionsForPlayer(Player player);
+
+    boolean isTransactionIdUnique(String transaction_id);
 
     Admin getAdmin(String username);
 
     void addAdmin(Admin admin);
 
-    List<Player> getAllPlayers();
+    List<Player> getBannedPlayers();
+
+    List<Player> getUnBannedPlayers();
+
 }

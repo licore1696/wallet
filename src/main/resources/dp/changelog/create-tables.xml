@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.7.xsd">
+
+    <!-- Создание схемы wallet -->
+    <changeSet id="create-wallet-schema" author="danik">
+        <sql>
+            CREATE SCHEMA wallet;
+        </sql>
+    </changeSet>
+
+    <!-- Создание таблицы admins в схеме wallet -->
+    <changeSet id="create-admins-table" author="danik">
+        <sql>
+            CREATE TABLE wallet.admins (
+                                           id serial PRIMARY KEY,
+                                           username VARCHAR(255) UNIQUE,
+                                           password VARCHAR(255)
+            );
+        </sql>
+    </changeSet>
+
+    <!-- Создание таблицы players в схеме wallet -->
+    <changeSet id="create-players-table" author="danik">
+        <sql>
+            CREATE TABLE wallet.players (
+                                            id serial PRIMARY KEY,
+                                            username VARCHAR(255) UNIQUE,
+                                            password VARCHAR(255),
+                                            balance DOUBLE PRECISION,
+                                            statusban BOOLEAN
+            );
+        </sql>
+    </changeSet>
+
+    <!-- Создание таблицы transactions в схеме wallet -->
+    <changeSet id="create-transactions-table" author="danik">
+        <sql>
+            CREATE TABLE wallet.transactions (
+                                                 id serial PRIMARY KEY,
+                                                 transactionid VARCHAR(255) UNIQUE,
+                                                 playerid INT,
+                                                 amount DOUBLE PRECISION
+            );
+        </sql>
+    </changeSet>
+
+    <!-- Добавьте сюда другие таблицы и изменения -->
+
+</databaseChangeLog>

@@ -37,7 +37,7 @@ public class Output {
         displayMessage("1. Регистрация администратора ");
         displayMessage("2. Блокировка игрока");
         displayMessage("3. Разблокировка игрока");
-        displayMessage("4. Список всех игроков");
+        displayMessage("4. Список разблокированных игроков");
         displayMessage("5. Список заблокированных игроков");
         displayMessage("0. Выход из меню администратора");
     }

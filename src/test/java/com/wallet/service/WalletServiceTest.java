@@ -1,200 +1,111 @@
 package com.wallet.service;
 
+import static org.junit.Assert.*;
+
 import com.wallet.audit.Audit;
+import com.wallet.audit.ConsoleAudit;
 import com.wallet.domain.Player;
-import com.wallet.domain.Transaction;
-import com.wallet.service.WalletService;
 import com.wallet.storage.Storage;
+import com.wallet.storage.StorageDB;
+import jdbc.connection.DatabaseConnection;
+import jdbc.repository.PlayerRepository;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@Testcontainers
 public class WalletServiceTest {
-
-    @Mock
-    private Storage storage;
-
-    @Mock
-    private Audit audit;
+    @Container
+    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
+            .withDatabaseName("testdb")
+            .withUsername("testuser")
+            .withPassword("testpassword");
 
     private WalletService walletService;
 
     @Before
     public void setUp() {
+        String jdbcUrl = postgreSQLContainer.getJdbcUrl();
+        String username = postgreSQLContainer.getUsername();
+        String password = postgreSQLContainer.getPassword();
+
+        // Создайте экземпляры классов Storage и Audit, которые используют настройки контейнера
+
+        Storage storage = new StorageDB(DatabaseConnection.testDatabaseConnection());
+        Audit audit = new ConsoleAudit();
+
         walletService = new WalletService(storage, audit);
     }
 
     @Test
-    public void testRegisterPlayer_Success() {
-        String username = "testUser";
-        String password = "testPassword";
+    public void testRegisterPlayer() {
+        Player player = new Player("testPlayer", "testPassword", 100.0, false);
+        boolean result = walletService.registerPlayer(player);
 
-        when(storage.getPlayer(username)).thenReturn(null);
-        Player player = new Player(username, password);
-        walletService.registerPlayer(player);
-
-        verify(storage).addPlayer(any(Player.class));
-        verify(audit).log(username, "Регистрация");
+        assertTrue(result);
+        Player retrievedPlayer = walletService.getPlayerByUsername("testPlayer");
+        assertNotNull(retrievedPlayer);
+        assertEquals("testPlayer", retrievedPlayer.getUsername());
+        assertEquals("testPassword", retrievedPlayer.getPassword());
     }
 
     @Test
-    public void testRegisterPlayer_Failure_UsernameExists() {
-        String username = "existingUser";
-        String password = "testPassword";
-
-        when(storage.getPlayer(username)).thenReturn(new Player(username, password));
-
-        Player player = new Player(username, password);
+    public void testAuthenticatePlayer_Success() {
+        Player player = new Player("testPlayer", "testPassword", 100.0, false);
         walletService.registerPlayer(player);
 
-        verify(storage, never()).addPlayer(any(Player.class));
-        verify(audit, never()).log(username, "Регистрация");
+        boolean result = walletService.authenticatePlayer(new Player("testPlayer", "testPassword", 0.0, false));
+        assertTrue(result);
     }
 
+    @Test
+    public void testAuthenticatePlayer_Failure_WrongPassword() {
+        Player player = new Player("testPlayer", "testPassword", 100.0, false);
+        walletService.registerPlayer(player);
+
+        boolean result = walletService.authenticatePlayer(new Player("testPlayer", "wrongPassword", 0.0, false));
+        assertFalse(result);
+    }
+
+    @Test
+    public void testAuthenticatePlayer_Failure_Banned() {
+        Player player = new Player("testPlayer", "testPassword", 100.0, true);
+        walletService.registerPlayer(player);
+
+        boolean result = walletService.authenticatePlayer(new Player("testPlayer", "testPassword", 0.0, false));
+        assertFalse(result);
+    }
 
     @Test
     public void testDebit_Success() {
-        String username = "testUser";
-        String transactionId = "123";
-        double initialBalance = 100.0;
-        double debitAmount = 50.0;
+        Player player = new Player("testPlayer", "testPassword", 100.0, false);
+        walletService.registerPlayer(player);
 
-        Player player = new Player(username, "password");
-        player.setBalance(initialBalance);
-
-        when(storage.getPlayer(username)).thenReturn(player);
-
-
-        boolean result = walletService.debit(username, transactionId, debitAmount);
-
+        boolean result = walletService.debit("testPlayer", "txn1", 50.0);
         assertTrue(result);
-        assertEquals(initialBalance - debitAmount, player.getBalance(), 0.01);
-        verify(audit).log(username, "Дебетовая транзакция");
+
+        double balance = walletService.getPlayerBalance("testPlayer");
+        assertEquals(50.0, balance, 0.01);
     }
 
     @Test
     public void testDebit_Failure_InsufficientBalance() {
-        String username = "testUser";
-        String transactionId = "123";
-        double initialBalance = 30.0; // Недостаточный баланс
-        double debitAmount = 50.0;
+        Player player = new Player("testPlayer", "testPassword", 100.0, false);
+        walletService.registerPlayer(player);
 
-        Player player = new Player(username, "password");
-        player.setBalance(initialBalance);
-
-        when(storage.getPlayer(username)).thenReturn(player);
-
-        boolean result = walletService.debit(username, transactionId, debitAmount);
-
-        assertFalse(result); // Ожидается, что дебет транзакция провалится из-за недостаточного баланса
-        assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Дебетовая транзакция"); // audit.log не должен быть вызван
+        boolean result = walletService.debit("testPlayer", "txn1", 150.0);
+        assertFalse(result);
     }
 
     @Test
-    public void testDebit_Failure_NonUniqueTransactionId() {
-        String username = "testUser";
-        String transactionId = "123";
-        double initialBalance = 100.0;
-        double debitAmount = 50.0;
+    public void testDebit_Failure_Banned() {
+        Player player = new Player("testPlayer", "testPassword", 100.0, true);
+        walletService.registerPlayer(player);
 
-        Player player = new Player(username, "password");
-        player.setBalance(initialBalance);
-        Transaction transaction = new Transaction(transactionId, 50.0);
-        player.addTransaction(transaction);
-
-        when(storage.getPlayer(username)).thenReturn(player);
-
-        boolean result = walletService.debit(username, transactionId, debitAmount);
-
-        assertFalse(result); // Ожидается, что дебет транзакция провалится из-за неуникального идентификатора транзакции
-        assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Дебетовая транзакция"); // audit.log не должен быть вызван
-    }
-
-
-    @Test
-    public void testCredit_Success() {
-        String username = "testUser";
-        String transactionId = "123";
-        double initialBalance = 100.0;
-        double creditAmount = 50.0;
-
-        Player player = new Player(username, "password");
-        player.setBalance(initialBalance);
-
-        when(storage.getPlayer(username)).thenReturn(player);
-
-        walletService.credit(username, transactionId, creditAmount);
-
-        assertEquals(initialBalance + creditAmount, player.getBalance(), 0.01);
-        verify(audit).log(username, "Кредитная транзакция");
-    }
-
-    @Test
-    public void testCredit_NonUniqueTransactionId() {
-        String username = "testUser";
-        String transactionId = "123";
-        double initialBalance = 100.0;
-        double creditAmount = 50.0;
-
-        Player player = new Player(username, "password");
-        player.setBalance(initialBalance);
-        Transaction transaction = new Transaction(transactionId, 50.0);
-        player.addTransaction(transaction);
-
-        when(storage.getPlayer(username)).thenReturn(player);
-
-        walletService.credit(username, transactionId, creditAmount);
-
-        assertEquals(initialBalance, player.getBalance(), 0.01); // Баланс не должен измениться
-        verify(audit, never()).log(username, "Кредитная транзакция"); // audit.log не должен быть вызван
-    }
-
-    @Test
-    public void testCredit_UsernameNotFound() {
-        String username = "nonExistentUser";
-        String transactionId = "123";
-        double creditAmount = 50.0;
-
-        when(storage.getPlayer(username)).thenReturn(null);
-
-        walletService.credit(username, transactionId, creditAmount);
-
-        verify(audit, never()).log(username, "Кредитная транзакция"); // audit.log не должен быть вызван
-    }
-
-
-    @Test
-    public void testIsTransactionIdUnique_UniqueTransactionId() {
-        String username = "testUser";
-        String transactionId = "123";
-
-        Player player = new Player(username, "password");
-        Transaction transaction = new Transaction(transactionId, 50.0);
-        player.addTransaction(transaction);
-
-        boolean result = walletService.isTransactionIdUnique(username, transactionId);
-
-        assertFalse(!result);
-    }
-
-    @Test
-    public void testIsTransactionIdUnique_NonUniqueTransactionId() {
-        String username = "testUser";
-        String transactionId = "123";
-
-        Player player = new Player(username, "password");
-
-        boolean result = walletService.isTransactionIdUnique(username, transactionId);
-
-        assertTrue(result);
+        boolean result = walletService.debit("testPlayer", "txn1", 50.0);
+        assertFalse(result);
     }
 }
-

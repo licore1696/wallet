@@ -5,150 +5,105 @@ import com.wallet.domain.Player;
 import com.wallet.domain.Transaction;
 import com.wallet.storage.Storage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Класс, предоставляющий сервисы для управления кошельками игроков и транзакциями.
+ * Сервис для управления кошельками игроков.
  */
 public class WalletService {
     private Storage storage;
     private Audit audit;
 
-    /**
-     * Конструктор для создания экземпляра сервиса кошельков.
-     *
-     * @param storage Хранилище данных игроков.
-     * @param audit   Служба аудита для регистрации действий пользователей.
-     */
     public WalletService(Storage storage, Audit audit) {
         this.storage = storage;
         this.audit = audit;
     }
 
     /**
-     * Регистрация нового игрока с указанным именем пользователя и паролем.
+     * Регистрирует нового игрока в системе.
      *
-     * @param player Аккаунт игрока.
+     * @param player Игрок для регистрации.
+     * @return true, если регистрация успешна, в противном случае - false.
      */
-    public void registerPlayer(Player player) {
-        Player existingPlayer = storage.getPlayer(player.getUsername());
-        if (existingPlayer == null) {
-            storage.addPlayer(player);
-            audit.log(player.getUsername(), "Регистрация");
-        } else {
-            System.out.println("Такой логин уже существует. Ошибка регистрации.");
-        }
+    public boolean registerPlayer(Player player) {
+        boolean result = storage.addPlayer(player);
+        return result;
     }
 
     /**
-     * Аутентификация игрока с указанным именем пользователя и паролем.
+     * Проверяет аутентификацию игрока.
      *
-     @param player Аккаунт игрока.
-     @return true, если аутентификация успешна, false в противном случае.
+     * @param player Игрок для аутентификации.
+     * @return true, если аутентификация успешна, в противном случае - false.
      */
     public boolean authenticatePlayer(Player player) {
-        Player exitingPlayer = storage.getPlayer(player.getUsername());
-        if (exitingPlayer != null && exitingPlayer.getPassword().equals(player.getPassword()) && !exitingPlayer.getStatusBan()) {
-            audit.log(player.getUsername(), "Аутентификация");
-            return true;
+        Player existingPlayer = storage.getPlayer(player.getUsername());
+        if (existingPlayer != null) {
+            return existingPlayer.getPassword().equals(player.getPassword()) && !existingPlayer.getStatusBan();
         }
         return false;
     }
 
     /**
-     * Получить баланс игрока по его имени пользователя.
+     * Получает баланс игрока по его имени пользователя.
      *
      * @param username Имя пользователя игрока.
-     * @return Текущий баланс игрока.
+     * @return Баланс игрока.
      */
     public double getPlayerBalance(String username) {
         Player player = storage.getPlayer(username);
         if (player != null) {
-            audit.log(username, "Проверка баланса");
             return player.getBalance();
         }
         return 0.0;
     }
 
     /**
-     * Снять средства с баланса игрока (дебетовая транзакция).
+     * Осуществляет списание средств с баланса игрока.
      *
      * @param username      Имя пользователя игрока.
      * @param transactionId Идентификатор транзакции.
-     * @param amount        Сумма для снятия.
-     * @return true, если дебетовая транзакция успешна, false в противном случае.
+     * @param amount        Сумма списания.
+     * @return true, если списание успешно, в противном случае - false.
      */
     public boolean debit(String username, String transactionId, double amount) {
         Player player = storage.getPlayer(username);
         if (player != null) {
-            synchronized (player) {
-                if (player.getBalance() >= amount && isTransactionIdUnique(username, transactionId) && amount>0) {
-                    player.setBalance(player.getBalance() - amount);
-                    Transaction transaction = new Transaction(transactionId, -amount);
-                    player.addTransaction(transaction);
-                    storage.updatePlayer(player);
-                    audit.log(username, "Дебетовая транзакция");
-                    return true;
-                } else {
-                    System.out.println("Дебетовая транзакция не удалась. Неуникальный идентификатор транзакции или отрицательный дебет.");
-                }
+            if (storage.isTransactionIdUnique(transactionId) && amount > 0 && player.getBalance() > amount && !player.getStatusBan()) {
+                player.setBalance(player.getBalance() - amount);
+                Transaction transaction = new Transaction(player.getId(), -amount, transactionId);
+                storage.addTransaction(transaction);
+                storage.updatePlayer(player);
+                return true;
             }
-        } else {
-            System.out.println("Дебетовая транзакция не удалась. Игрок не найден");
         }
         return false;
     }
 
     /**
-     * Пополнить счет игрока (кредитная транзакция).
+     * Осуществляет зачисление средств на баланс игрока.
      *
      * @param username      Имя пользователя игрока.
      * @param transactionId Идентификатор транзакции.
-     * @param amount        Сумма для пополнения.
+     * @param amount        Сумма зачисления.
+     * @return true, если зачисление успешно, в противном случае - false.
      */
-    public void credit(String username, String transactionId, double amount) {
+    public boolean credit(String username, String transactionId, double amount) {
         Player player = storage.getPlayer(username);
         if (player != null) {
-            synchronized (player) {
-                if (isTransactionIdUnique(username, transactionId)&&amount>0) {
-
-                    player.setBalance(player.getBalance() + amount);
-                    Transaction transaction = new Transaction(transactionId, amount);
-                    player.addTransaction(transaction);
-                    storage.updatePlayer(player);
-                    audit.log(username, "Кредитная транзакция");
-                } else {
-                    System.out.println("Кредитная транзакция не удалась. Неуникальный идентификатор транзакции или отрицательный кредит.");
-                }
+            if (storage.isTransactionIdUnique(transactionId) && amount > 0 && !player.getStatusBan()) {
+                player.setBalance(player.getBalance() + amount);
+                Transaction transaction = new Transaction(player.getId(), amount, transactionId);
+                storage.addTransaction(transaction);
+                storage.updatePlayer(player);
+                return true;
             }
-        } else {
-            System.out.println("Кредитная транзакция не удалась. Игрок не найден");
         }
+        return false;
     }
 
     /**
-     * Проверить, что идентификатор транзакции уникален для игрока.
-     *
-     * @param username      Имя пользователя игрока.
-     * @param transactionId Идентификатор транзакции для проверки.
-     * @return true, если идентификатор транзакции уникален, false в противном случае.
-     */
-    public boolean isTransactionIdUnique(String username, String transactionId) {
-        Player player = storage.getPlayer(username);
-        if (player != null) {
-            List<Transaction> transactions = player.getTransactionHistory();
-            for (Transaction transaction : transactions) {
-                if (transaction.getTransactionId().equals(transactionId)) {
-                    return false; // Идентификатор транзакции не уникален
-                }
-            }
-        }
-        return true; // Идентификатор транзакции уникален
-    }
-
-    /**
-     * Получить историю транзакций игрока по его имени пользователя.
+     * Получает историю транзакций игрока.
      *
      * @param username Имя пользователя игрока.
      * @return Список транзакций игрока.
@@ -156,9 +111,8 @@ public class WalletService {
     public List<Transaction> getPlayerTransactionHistory(String username) {
         Player player = storage.getPlayer(username);
         if (player != null) {
-            audit.log(username, "Проверка Истории транзакций");
-            return player.getTransactionHistory();
+            return storage.getTransactionsForPlayer(player);
         }
-        return new ArrayList<>();
+        return null;
     }
 }

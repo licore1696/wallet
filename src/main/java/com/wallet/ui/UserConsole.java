@@ -1,34 +1,34 @@
 package com.wallet.ui;
 
 import com.wallet.audit.Audit;
-import com.wallet.audit.ConsoleAudit;
 import com.wallet.domain.Player;
 import com.wallet.domain.Transaction;
 import com.wallet.in.Input;
+import com.wallet.out.Output;
 import com.wallet.service.AdminService;
 import com.wallet.service.WalletService;
-import com.wallet.out.Output;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class UserConsole {
     private WalletService walletService;
-    private AdminConsole adminConsole;
-    public Input input;
-    Output output = new Output(System.out);
     private AdminService adminService;
-    private Audit audit = new ConsoleAudit();
+    public Input input;
+    private Output output;
+    private Audit audit;
+    private Scanner scanner;
 
-    public UserConsole(WalletService walletService, AdminService adminService, Scanner scanner,Audit audit) {
+    public UserConsole(WalletService walletService, AdminService adminService,Scanner scanner, Audit audit) {
         this.walletService = walletService;
         this.adminService = adminService;
-        this.input=new Input(scanner);
-        this.audit=audit;
+        this.input = new Input(scanner);
+        this.output = new Output(System.out);
+        this.audit = audit;
+        this.scanner = scanner;
     }
 
     public void runUserInterface() {
-        Scanner scanner = new Scanner(System.in);
 
         while (true) {
             output.displayUserMenu();
@@ -69,12 +69,21 @@ public class UserConsole {
     }
 
     public void registerPlayer(Scanner scanner) {
-        walletService.registerPlayer(input.InputPlayer(scanner));
+        Player player = input.inputPlayer(scanner);
+        boolean isRegistered = walletService.registerPlayer(player);
+        if(isRegistered){
+            output.displayMessage("Успешная регистрация.");
+            audit.log(player.getUsername(),"Регистрация");
+        }
+        else {
+            output.displayMessage("Решистрация не удалась. Такой пользователь уже существует.");
+        }
+
     }
 
-    void authenticatePlayer(Scanner scanner) {
-        Player authplayer = input.InputPlayer(scanner);
-        boolean isAuthenticated = walletService.authenticatePlayer(authplayer);
+    public void authenticatePlayer(Scanner scanner) {
+        Player authPlayer = input.inputPlayer(scanner);
+        boolean isAuthenticated = walletService.authenticatePlayer(authPlayer);
         if (isAuthenticated) {
             output.displayMessage("Аутентификация успешная.");
         } else {
@@ -82,39 +91,56 @@ public class UserConsole {
         }
     }
 
-    void checkPlayerBalance(Scanner scanner) {
-        String checkBalanceUsername = input.InputUsername(scanner);
+    public void checkPlayerBalance(Scanner scanner) {
+        String checkBalanceUsername = input.inputUsername(scanner);
         double balance = walletService.getPlayerBalance(checkBalanceUsername);
         output.displayMessage("Баланс: " + balance);
         audit.log(checkBalanceUsername, "Проверка баланса");
     }
 
-    void debit(Scanner scanner) {
-        String debitUsername = input.InputUsername(scanner);
-        String debitTransactionId = input.getStringInput("Введите идентификатор транзакции: ");
-        double debitAmount = input.getDoubleInput("Введите сумму дебета: ");
+    public void debit(Scanner scanner) {
+        String debitUsername = input.inputUsername(scanner);
+        String debitTransactionId = input.inputTransactionId(scanner);
+        double debitAmount = input.inputAmount(scanner);
 
-        walletService.debit(debitUsername, debitTransactionId, debitAmount);
+        boolean result = walletService.debit(debitUsername, debitTransactionId, debitAmount);
+
+        if (result) {
+            output.displayMessage("Дебетовая транзакция выполнена успешно.");
+            audit.log(debitUsername, "Дебетовая транзакция");
+        } else {
+            output.displayMessage("Дебетовая транзакция не выполнена.");
+        }
     }
 
-    void credit(Scanner scanner) {
-        String creditUsername = input.InputUsername(scanner);
-        String creditTransactionId = input.getStringInputNoBuff("Введите идентификатор транзакции: ");
-        double creditAmount = input.getDoubleInput("Введите сумму кредита: ");
-        walletService.credit(creditUsername, creditTransactionId, creditAmount);
+    public void credit(Scanner scanner) {
+        String creditUsername = input.inputUsername(scanner);
+        String creditTransactionId = input.inputTransactionId(scanner);
+        double creditAmount = input.inputAmount(scanner);
+
+        boolean result = walletService.credit(creditUsername, creditTransactionId, creditAmount);
+        if (result){
+            output.displayMessage("Кредитная транзакция выполнена успешно.");
+            audit.log(creditUsername, "Кредитная транзакция");
+        }
+        else {
+            output.displayMessage("Кредитная транзакция не выполнена.");
+        }
     }
 
-    void displayTransactionHistory(Scanner scanner) {
-        String historyUsername = input.InputUsername(scanner);
-        audit.log(historyUsername, "История транзакций");
+    public void displayTransactionHistory(Scanner scanner) {
+        String historyUsername = input.inputUsername(scanner);
+
         List<Transaction> transactions = walletService.getPlayerTransactionHistory(historyUsername);
         for (Transaction transaction : transactions) {
             output.displayMessage("Идентификатор транзакции: " + transaction.getTransactionId() + ", Сумма: " + transaction.getAmount());
         }
+
+        audit.log(historyUsername, "История транзакций");
     }
 
     private void authenticateAdmin(Scanner scanner) {
-        adminConsole = new AdminConsole(input, adminService, audit);
+        AdminConsole adminConsole = new AdminConsole(input, adminService, audit);
         adminConsole.startAdminConsole(scanner);
     }
 }

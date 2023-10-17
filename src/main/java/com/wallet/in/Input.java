@@ -43,12 +43,12 @@ public class Input {
     /**
      * Получить число с плавающей запятой, запрашивая ввод с заданным приглашением.
      *
-     * @param prompt Приглашение для ввода.
+     * @param scanner Поток ввода.
      * @return Введенное число с плавающей запятой.
      */
-    public double getDoubleInput(String prompt) {
-        System.out.print(prompt);
-        return ownScanner.nextDouble();
+    public double inputAmount(Scanner scanner) {
+        System.out.print("Введите сумму: ");
+        return scanner.nextDouble();
     }
 
     /**
@@ -80,12 +80,12 @@ public class Input {
      * @param scanner Объект Scanner для ввода данных.
      * @return Объект Player с введенными данными.
      */
-    public Player InputPlayer(Scanner scanner) {
+    public Player inputPlayer(Scanner scanner) {
         System.out.print("Введите имя пользователя: ");
         String Username = scanner.nextLine();
         System.out.print("Введите пароль: ");
         String Password = scanner.nextLine();
-        return new Player(Username, Password);
+        return new Player(Username, Password, 0, false);
     }
 
     /**
@@ -94,7 +94,7 @@ public class Input {
      * @param scanner Объект Scanner для ввода данных.
      * @return Введенное имя пользователя.
      */
-    public String InputUsername(Scanner scanner) {
+    public String inputUsername(Scanner scanner) {
         System.out.print("Введите имя пользователя: ");
         return scanner.nextLine();
     }
@@ -111,5 +111,10 @@ public class Input {
         System.out.print("Введите пароль: ");
         String adminPassword = scanner.nextLine();
         return new Admin(adminUsername, adminPassword);
+    }
+
+    public String inputTransactionId(Scanner scanner) {
+        System.out.print("Введите id транзакции: ");
+        return scanner.nextLine();
     }
 }

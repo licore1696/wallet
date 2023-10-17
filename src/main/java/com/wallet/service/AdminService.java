@@ -5,7 +5,6 @@ import com.wallet.domain.Admin;
 import com.wallet.domain.Player;
 import com.wallet.storage.Storage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,8 +23,6 @@ public class AdminService {
     public AdminService(Storage storage, Audit audit) {
         this.storage = storage;
         this.audit = audit;
-        Admin admin = new Admin("admin", "admin");
-        storage.addAdmin(admin);
     }
 
     /**
@@ -72,6 +69,7 @@ public class AdminService {
             Player player = storage.getPlayer(playerUsername);
             if (player != null) {
                 player.setStatusBan(true);
+                storage.updatePlayer(player);
                 return true;
             }
         }
@@ -91,6 +89,7 @@ public class AdminService {
             Player player = storage.getPlayer(playerUsername);
             if (player != null) {
                 player.setStatusBan(false);
+                storage.updatePlayer(player);
                 return true;
             }
         }
@@ -102,9 +101,8 @@ public class AdminService {
      *
      * @return Список игроков.
      */
-    public List<Player> getPlayers() {
-        List<Player> players = storage.getAllPlayers();
-        return players;
+    public List<Player> getUnBannedPlayers() {
+        return storage.getUnBannedPlayers();
     }
 
     /**
@@ -113,15 +111,6 @@ public class AdminService {
      * @return Список заблокированных игроков.
      */
     public List<Player> getBannedPlayers() {
-        List<Player> bannedPlayers = new ArrayList<>();
-        List<Player> players = storage.getAllPlayers();
-
-        for (Player player : players) {
-            if (player.getStatusBan()) {
-                bannedPlayers.add(player);
-            }
-        }
-
-        return bannedPlayers;
+       return storage.getBannedPlayers();
     }
 }

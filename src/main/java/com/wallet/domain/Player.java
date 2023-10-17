@@ -1,41 +1,85 @@
 package com.wallet.domain;
 
-import java.util.ArrayList;
-import java.util.List;
 /**
  * Представляет игрока в сервисе кошельков.
  */
 public class Player {
+    private int id;
     private String username;
     private String password;
     private double balance;
-    private List<Transaction> transactionHistory;
-    private Boolean StatusBan;
-
+    private boolean statusBan;
 
     /**
-     * Конструктор для создания нового игрока с указанными данными.
+     * Конструктор для создания объекта Player с указанным идентификатором, именем пользователя, паролем, балансом и статусом блокировки.
      *
-     * @param username Имя пользователя игрока.
-     * @param password Пароль игрока.
+     * @param id         Идентификатор игрока.
+     * @param username   Имя пользователя игрока.
+     * @param password   Пароль игрока.
+     * @param balance    Баланс игрока.
+     * @param statusBan  Статус блокировки игрока (true - заблокирован, false - не заблокирован).
      */
-    public Player(String username, String password) {
+    public Player(int id, String username, String password, double balance, boolean statusBan) {
+        this.id = id;
         this.username = username;
         this.password = password;
-        this.balance = 0.0;
-        this.transactionHistory = new ArrayList<>();
-        this.StatusBan=false;
+        this.balance = balance;
+        this.statusBan = statusBan;
     }
+
     /**
-     * Возвращает имя пользователя игрока.
+     * Конструктор для создания объекта Player без указания идентификатора.
+     *
+     * @param username   Имя пользователя игрока.
+     * @param password   Пароль игрока.
+     * @param balance    Баланс игрока.
+     * @param statusBan  Статус блокировки игрока (true - заблокирован, false - не заблокирован).
+     */
+    public Player(String username, String password, double balance, boolean statusBan) {
+        this.username = username;
+        this.password = password;
+        this.balance = balance;
+        this.statusBan = statusBan;
+    }
+
+    /**
+     * Получить идентификатор игрока.
+     *
+     * @return Идентификатор игрока.
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Установить идентификатор игрока.
+     *
+     * @param playerId Новый идентификатор игрока.
+     */
+    public void setId(int playerId) {
+        this.id = playerId;
+    }
+
+    /**
+     * Получить имя пользователя игрока.
      *
      * @return Имя пользователя игрока.
      */
     public String getUsername() {
         return username;
     }
+
     /**
-     * Возвращает пароль игрока.
+     * Установить имя пользователя игрока.
+     *
+     * @param username Новое имя пользователя игрока.
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * Получить пароль игрока.
      *
      * @return Пароль игрока.
      */
@@ -44,50 +88,55 @@ public class Player {
     }
 
     /**
-     * Получить текущий баланс игрока.
+     * Установить пароль игрока.
      *
-     * @return Текущий баланс игрока.
+     * @param password Новый пароль игрока.
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Получить баланс игрока.
+     *
+     * @return Баланс игрока.
      */
     public double getBalance() {
         return balance;
     }
 
     /**
-     * Получить статус блокировки.
-     *
-     * @return Статус блокировки.
-     */
-    public boolean getStatusBan() { return StatusBan; }
-    /**
-     * Изменить статус блокировки.
-     *
-     * @param statusBan Новый статус блокировки.
-     */
-    public void setStatusBan(boolean statusBan) { StatusBan=statusBan; }
-
-    /**
-     * Получить историю транзакций игрока.
-     *
-     * @return Список транзакций игрока.
-     */
-    public List<Transaction> getTransactionHistory() {
-        return transactionHistory;
-    }
-    /**
-     * Установить баланс игрока на указанное значение.
+     * Установить баланс игрока.
      *
      * @param balance Новый баланс игрока.
      */
     public void setBalance(double balance) {
         this.balance = balance;
     }
+
     /**
-     * Добавить новую транзакцию в историю игрока.
+     * Проверить статус блокировки игрока.
      *
-     * @param transaction Новая транзакция для добавления.
+     * @return true, если игрок заблокирован, в противном случае - false.
      */
-    public void addTransaction(Transaction transaction) {
-        transactionHistory.add(transaction);
+    public boolean isStatusBan() {
+        return statusBan;
+    }
+
+    /**
+     * Установить статус блокировки игрока.
+     *
+     * @param statusBan Новый статус блокировки игрока (true - заблокирован, false - не заблокирован).
+     */
+    public void setStatusBan(boolean statusBan) {
+        this.statusBan = statusBan;
+    }
+    /**
+     * Установить статус блокировки игрока.
+     *
+     * @return Статус игрока.
+     */
+    public boolean getStatusBan() {
+        return statusBan;
     }
 }
-
